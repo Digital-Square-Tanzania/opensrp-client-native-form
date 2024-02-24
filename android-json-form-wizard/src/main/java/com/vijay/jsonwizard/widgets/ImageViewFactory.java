@@ -18,6 +18,7 @@ import com.vijay.jsonwizard.domain.WidgetArgs;
 import com.vijay.jsonwizard.fragments.JsonFormFragment;
 import com.vijay.jsonwizard.interfaces.CommonListener;
 import com.vijay.jsonwizard.interfaces.FormWidgetFactory;
+import com.vijay.jsonwizard.interfaces.JsonApi;
 import com.vijay.jsonwizard.utils.FormUtils;
 
 import org.json.JSONArray;
@@ -45,7 +46,7 @@ public class ImageViewFactory implements FormWidgetFactory {
                 .withPopup(popup)
                 .withStepName(stepName);
 
-        setWidgetTags(widgetArgs);
+        setWidgetTags(widgetArgs, context);
         setViewConfigs(widgetArgs);
 
         List<View> views = new ArrayList<>(1);
@@ -67,7 +68,7 @@ public class ImageViewFactory implements FormWidgetFactory {
         return R.layout.native_form_image_view;
     }
 
-    private void setWidgetTags(WidgetArgs widgetArgs) {
+    private void setWidgetTags(WidgetArgs widgetArgs, Context context) {
         JSONObject jsonObject = widgetArgs.getJsonObject();
         String stepName = widgetArgs.getStepName();
 
@@ -77,10 +78,16 @@ public class ImageViewFactory implements FormWidgetFactory {
         JSONArray canvasIds = new JSONArray();
         rootLayout.setId(ViewUtil.generateViewId());
         canvasIds.put(rootLayout.getId());
-        rootLayout.setTag(R.id.canvas_ids, canvasIds);
+        rootLayout.setTag(R.id.canvas_ids, canvasIds.toString());
         rootLayout.setTag(R.id.type, jsonObject.optString(JsonFormConstants.TYPE));
         rootLayout.setTag(R.id.address, stepName + ":" + jsonObject.optString(JsonFormConstants.KEY));
         rootLayout.setTag(R.id.extraPopup, false);
+
+        String relevance = jsonObject.optString(JsonFormConstants.RELEVANCE);
+        if (!TextUtils.isEmpty(relevance) && context instanceof JsonApi) {
+            rootLayout.setTag(R.id.relevance, relevance);
+            ((JsonApi) context).addSkipLogicView(rootLayout);
+        }
     }
 
 
