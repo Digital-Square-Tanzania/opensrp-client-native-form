@@ -101,6 +101,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CountDownLatch;
@@ -2007,7 +2008,11 @@ public class JsonFormActivity extends JsonFormBaseActivity implements JsonApi {
                 getAppExecutors().mainThread().execute(new Runnable() {
                     @Override
                     public void run() {
-                        ((EditText) view).setText(finalCalculation);
+                        try {
+                            ((EditText) view).setText(finalCalculation);
+                        }catch (Exception e){
+                            Timber.e(e);
+                        }
                     }
                 });
             }

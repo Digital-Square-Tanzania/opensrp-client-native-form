@@ -67,7 +67,8 @@ public class GenericTextWatcher implements TextWatcher, View.OnFocusChangeListen
         if (formFragment.getContext() instanceof JsonApi) {
             api = (JsonApi) formFragment.getContext();
         } else {
-            throw new JsonFormRuntimeException("Could not fetch context");
+            Timber.e(new JsonFormRuntimeException("Could not fetch context"));
+            return;
         }
 
         String key = (String) mView.getTag(R.id.key);
