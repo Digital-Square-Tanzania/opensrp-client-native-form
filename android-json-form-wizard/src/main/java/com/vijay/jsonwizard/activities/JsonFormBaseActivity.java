@@ -15,7 +15,6 @@ import com.google.gson.reflect.TypeToken;
 import com.vijay.jsonwizard.NativeFormLibrary;
 import com.vijay.jsonwizard.R;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
-import com.vijay.jsonwizard.domain.Form;
 import com.vijay.jsonwizard.fragments.JsonFormFragment;
 import com.vijay.jsonwizard.interfaces.LifeCycleListener;
 import com.vijay.jsonwizard.interfaces.OnActivityRequestPermissionResultListener;
@@ -30,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.smartregister.client.utils.contract.ClientFormContract;
+import org.smartregister.client.utils.domain.Form;
 
 import java.io.BufferedReader;
 import java.io.IOException;

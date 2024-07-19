@@ -21,7 +21,7 @@ import com.vijay.jsonwizard.R;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
 import com.vijay.jsonwizard.customviews.DatePickerDialog;
 import com.vijay.jsonwizard.customviews.GenericTextWatcher;
-import com.vijay.jsonwizard.domain.Form;
+import org.smartregister.client.utils.domain.Form;
 import com.vijay.jsonwizard.fragments.JsonFormFragment;
 import com.vijay.jsonwizard.interfaces.CommonListener;
 import com.vijay.jsonwizard.interfaces.FormWidgetFactory;

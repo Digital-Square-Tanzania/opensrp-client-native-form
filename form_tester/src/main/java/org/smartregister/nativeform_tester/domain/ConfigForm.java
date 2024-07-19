@@ -2,7 +2,7 @@ package org.smartregister.nativeform_tester.domain;
 
 import android.content.Context;
 
-import com.vijay.jsonwizard.domain.Form;
+import org.smartregister.client.utils.domain.Form;
 import com.vijay.jsonwizard.utils.ResourceType;
 import com.vijay.jsonwizard.utils.Utils;
 

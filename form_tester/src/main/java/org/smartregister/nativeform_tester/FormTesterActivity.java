@@ -23,7 +23,7 @@ import android.widget.Toast;
 import com.vijay.jsonwizard.activities.JsonFormActivity;
 import com.vijay.jsonwizard.activities.JsonWizardFormActivity;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
-import com.vijay.jsonwizard.domain.Form;
+import org.smartregister.client.utils.domain.Form;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;

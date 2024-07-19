@@ -1,7 +1,7 @@
 package com.vijay.jsonwizard.rules;
 
 import com.vijay.jsonwizard.BaseTest;
-import com.vijay.jsonwizard.domain.Form;
+import org.smartregister.client.utils.domain.Form;
 import com.vijay.jsonwizard.utils.Utils;
 
 import org.joda.time.Days;

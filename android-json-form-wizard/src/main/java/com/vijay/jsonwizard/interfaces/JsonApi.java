@@ -3,7 +3,6 @@ package com.vijay.jsonwizard.interfaces;
 import android.view.View;
 
 import com.vijay.jsonwizard.customviews.GenericPopupDialog;
-import com.vijay.jsonwizard.domain.Form;
 import com.vijay.jsonwizard.rules.RulesEngineFactory;
 import com.vijay.jsonwizard.utils.AppExecutors;
 import com.vijay.jsonwizard.utils.ValidationStatus;
@@ -12,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.smartregister.client.utils.contract.ClientFormContract;
+import org.smartregister.client.utils.domain.Form;
 
 import java.util.Collection;
 import java.util.Map;

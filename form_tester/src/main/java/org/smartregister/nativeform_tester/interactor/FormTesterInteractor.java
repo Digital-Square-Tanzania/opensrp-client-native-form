@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
-import com.vijay.jsonwizard.domain.Form;
+import org.smartregister.client.utils.domain.Form;
 import com.vijay.jsonwizard.utils.Utils;
 
 import org.jetbrains.annotations.NotNull;

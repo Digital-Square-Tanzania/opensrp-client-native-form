@@ -4,7 +4,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
-import com.vijay.jsonwizard.domain.Form;
+import org.smartregister.client.utils.domain.Form;
 import com.vijay.jsonwizard.utils.FormUtils;
 import com.vijay.jsonwizard.utils.Utils;
 

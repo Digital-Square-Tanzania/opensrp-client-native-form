@@ -38,7 +38,7 @@ import com.vijay.jsonwizard.R;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
 import com.vijay.jsonwizard.customviews.CompoundButton;
 import com.vijay.jsonwizard.customviews.ExpansionPanelGenericPopupDialog;
-import com.vijay.jsonwizard.domain.Form;
+import org.smartregister.client.utils.domain.Form;
 import com.vijay.jsonwizard.domain.WidgetArgs;
 import com.vijay.jsonwizard.event.BaseEvent;
 import com.vijay.jsonwizard.fragments.JsonFormFragment;

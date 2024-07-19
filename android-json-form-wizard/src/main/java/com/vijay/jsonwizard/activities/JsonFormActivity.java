@@ -61,7 +61,6 @@ import com.vijay.jsonwizard.constants.JsonFormConstants;
 import com.vijay.jsonwizard.customviews.GenericPopupDialog;
 import com.vijay.jsonwizard.customviews.MaterialSpinner;
 import com.vijay.jsonwizard.customviews.TextableView;
-import com.vijay.jsonwizard.domain.Form;
 import com.vijay.jsonwizard.event.RefreshExpansionPanelEvent;
 import com.vijay.jsonwizard.interfaces.CommonListener;
 import com.vijay.jsonwizard.interfaces.GenericDialogInterface;
@@ -89,6 +88,7 @@ import org.jeasy.rules.api.Facts;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.smartregister.client.utils.domain.Form;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedReader;

@@ -24,7 +24,7 @@ import com.vijay.jsonwizard.R;
 import com.vijay.jsonwizard.TestConstants;
 import com.vijay.jsonwizard.TestUtils;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
-import com.vijay.jsonwizard.domain.Form;
+import org.smartregister.client.utils.domain.Form;
 import com.vijay.jsonwizard.event.RefreshExpansionPanelEvent;
 import com.vijay.jsonwizard.fragments.JsonFormFragment;
 import com.vijay.jsonwizard.utils.FormUtils;
