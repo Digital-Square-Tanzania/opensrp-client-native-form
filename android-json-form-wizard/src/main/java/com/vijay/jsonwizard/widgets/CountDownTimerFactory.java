@@ -113,7 +113,7 @@ public class CountDownTimerFactory implements FormWidgetFactory {
 
         labelView.setText(label);
 
-        progressBar.setStrokeWidthDimension(20);
+        progressBar.setStrokeWidth(20);
         progressBar.setMaxValue(progressBarMaxValue);
 
         String countdownTimeUnit = jsonObject.optString(JsonFormConstants.COUNTDOWN_TIME_UNIT, JsonFormConstants.DEFAULT_COUNTDOWN_TIME_UNIT);

@@ -20,6 +20,29 @@ jacoco {
     reportsDir = file("$buildDir/reports/jacoco")
 }
 
+def githubProperties = new Properties()
+githubProperties.load(new FileInputStream(rootProject.file("github.properties")))
+
+allprojects {
+    repositories {
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+        maven { url "https://s3.amazonaws.com/repo.commonsware.com" }
+        mavenLocal()
+        mavenCentral()
+
+        maven {
+
+            name = "GitHubPackages"
+
+            url = uri("https://maven.pkg.github.com/Digital-Square-Tanzania/CircleProgressbar.git")
+            credentials {
+                username = githubProperties['gpr.usr'] ?: System.getenv("GPR_USER")
+                password = githubProperties['gpr.key'] ?: System.getenv("GPR_API_KEY")
+            }
+        }
+
+    }
+}
 android {
     compileSdkVersion androidCompileSdkVersion
     buildToolsVersion androidBuildToolsVersion
@@ -72,9 +95,6 @@ tasks.withType(Test) {
     jacoco.includeNoLocationClasses = true
     jacoco.excludes = ['jdk.internal.*']
 }
-
-def githubProperties = new Properties()
-githubProperties.load(new FileInputStream(rootProject.file("github.properties")))
 
 def getVersionName = { ->
     return VERSION_NAME // Library version
@@ -205,7 +225,7 @@ dependencies {
     }
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
 
-    implementation('io.ona.CircleProgressbar:lib:0.1.0@aar') {
+    implementation('com.emredavarci:circleprogressbar:1.0.8-SNAPSHOT@aar') {
         exclude group: 'com.android.support.constraint', module: 'constraint-layout'
         exclude group: 'com.android.support', module: 'design'
         exclude group: 'com.android.support', module: 'appcompat-v7'
