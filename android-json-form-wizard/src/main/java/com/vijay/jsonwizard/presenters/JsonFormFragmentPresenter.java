@@ -110,7 +110,7 @@ public class JsonFormFragmentPresenter extends
     protected JSONObject mStepDetails;
     protected String key;
     protected String type;
-    private String mStepName;
+    protected String mStepName;
     private String mCurrentKey;
     private String mCurrentPhotoPath;
     private JsonFormInteractor mJsonFormInteractor;
