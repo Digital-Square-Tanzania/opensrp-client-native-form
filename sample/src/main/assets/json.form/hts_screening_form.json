@@ -1,0 +1,323 @@
+{
+  "count": "4",
+  "encounter_type": "HTS Screening",
+  "entity_id": "",
+  "relational_id": "",
+  "validate_on_submit": true,
+  "show_errors_on_submit": true,
+  "metadata": {
+    "start": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "concept",
+      "openmrs_data_type": "start",
+      "openmrs_entity_id": "163137AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "end": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "concept",
+      "openmrs_data_type": "end",
+      "openmrs_entity_id": "163138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "today": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "encounter",
+      "openmrs_entity_id": "encounter_date"
+    },
+    "deviceid": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "concept",
+      "openmrs_data_type": "deviceid",
+      "openmrs_entity_id": "163149AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "subscriberid": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "concept",
+      "openmrs_data_type": "subscriberid",
+      "openmrs_entity_id": "163150AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "simserial": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "concept",
+      "openmrs_data_type": "simserial",
+      "openmrs_entity_id": "163151AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "phonenumber": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "concept",
+      "openmrs_data_type": "phonenumber",
+      "openmrs_entity_id": "163152AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "encounter_location": "",
+    "look_up": {
+      "entity_id": "",
+      "value": ""
+    }
+  },
+  "step1": {
+    "next": "step2",
+    "title": "HTS Screening",
+    "fields": [
+      {
+        "key": "hts_is_client_pregnant",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "",
+        "openmrs_entity_id": "",
+        "type": "native_radio",
+        "label": "Pregnancy & Breast Feeding",
+        "options": [
+          {
+            "key": "yes",
+            "text": "Yes",
+            "value": true
+          },
+          {
+            "key": "no",
+            "text": "No",
+            "value": true
+          }
+        ],
+        "v_required": {
+          "value": "true",
+          "err": "Please select a value"
+        }
+      },
+      {
+        "key": "hts_is_client_breast_feeding",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "",
+        "openmrs_entity_id": "",
+        "type": "native_radio",
+        "label": "Pregnancy & Breast Feeding",
+        "options": [
+          {
+            "key": "yes",
+            "text": "Yes",
+            "value": true
+          },
+          {
+            "key": "no",
+            "text": "No",
+            "value": true
+          }
+        ],
+        "v_required": {
+          "value": "true",
+          "err": "Please select a value"
+        }
+      }
+    ]
+  },
+  "step2": {
+    "next": "step3",
+    "title": "General Health Assessment",
+    "fields": [
+      {
+        "key": "hts_does_the_client_have_any_of_the_following_general_health_assessment",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "",
+        "openmrs_entity_id": "",
+        "type": "check_box",
+        "label": "Does the client have any of the following?",
+        "label_text_style": "bold",
+        "text_color": "#000000",
+        "options": [
+          {
+            "key": "swollen_glands_lymph_nodes",
+            "text": "Swollen glands/lymph nodes"
+          },
+          {
+            "key": "mouth_ulcer_sores_rashes",
+            "text": "Mouth ulcer/Sores/Rashes"
+          },
+          {
+            "key": "recurrent_skin_diseases",
+            "text": "Recurrent Skin Diseases"
+          }
+        ],
+        "v_required": {
+          "value": "true",
+          "err": "Please select an option"
+        }
+      },
+      {
+        "key": "hts_does_the_client_have_any_of_the_following_tb_symptoms_assessment",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "",
+        "openmrs_entity_id": "",
+        "type": "check_box",
+        "label": "Does the client have any of the following?",
+        "label_text_style": "bold",
+        "text_color": "#000000",
+        "options": [
+          {
+            "key": "cough_of_more_than_two_weeks",
+            "text": "Cough of more than two weeks"
+          },
+          {
+            "key": "fever_of_more_than_two_weeks",
+            "text": "Fever of more than two weeks"
+          },
+          {
+            "key": "night_sweats_for_any_duration",
+            "text": "Night sweats for any duration"
+          },
+          {
+            "key": "noticeable_weight_loss",
+            "text": "Noticeable weight loss"
+          },
+          {
+            "key": "blood_stained_sputum",
+            "text": "Blood stained spatum"
+          },
+          {
+            "key": "none",
+            "text": "None"
+          }
+        ],
+        "v_required": {
+          "value": "true",
+          "err": "Please select an option"
+        }
+      }
+    ]
+  },
+  "step3": {
+    "next": "step4",
+    "title": "STI Symptoms Assessment",
+    "fields": [
+      {
+        "key": "hts_does_the_client_have_any_of_the_following_sti_symptoms_assessment",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "",
+        "openmrs_entity_id": "",
+        "type": "check_box",
+        "label": "Does the client have any of the following?",
+        "label_text_style": "bold",
+        "text_color": "#000000",
+        "options": [
+          {
+            "key": "abnormal_discharge_from_the_vagina_penis",
+            "text": "Abnormal discharge from the vagina/penis"
+          },
+          {
+            "key": "burning_itching_or_pain_when_urinating",
+            "text": "Burning, itching or pain then urinating (Pee)"
+          },
+          {
+            "key": "any_ulcer_sore_or_warts_in_genital_areas",
+            "text": "Any ulcer/sore/warts in genital areas"
+          },
+          {
+            "key": "none",
+            "text": "None"
+          }
+        ],
+        "v_required": {
+          "value": "true",
+          "err": "Please select an option"
+        }
+      },
+      {
+        "key": "hts_does_the_client_have_any_of_the_following_tb_symptoms_assessment",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "",
+        "openmrs_entity_id": "",
+        "type": "check_box",
+        "label": "Does the client have any of the following?",
+        "label_text_style": "bold",
+        "text_color": "#000000",
+        "options": [
+          {
+            "key": "cough_of_more_than_two_weeks",
+            "text": "Cough of more than two weeks"
+          },
+          {
+            "key": "fever_of_more_than_two_weeks",
+            "text": "Fever of more than two weeks"
+          },
+          {
+            "key": "night_sweats_for_any_duration",
+            "text": "Night sweats for any duration"
+          },
+          {
+            "key": "noticeable_weight_loss",
+            "text": "Noticeable weight loss"
+          },
+          {
+            "key": "blood_stained_sputum",
+            "text": "Blood stained sputum"
+          },
+          {
+            "key": "none",
+            "text": "None"
+          }
+        ],
+        "v_required": {
+          "value": "true",
+          "err": "Please select an option"
+        }
+      }
+    ]
+  },
+  "step4": {
+    "title": "HIV Exposure Assessment",
+    "fields": [
+      {
+        "key": "hts_does_the_client_have_any_of_the_following_risks_HIV_exposure_assessment",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "",
+        "openmrs_entity_id": "",
+        "type": "native_radio",
+        "label": "Does the client have any of the following?",
+        "label_text_style": "bold",
+        "text_color": "#000000",
+        "options": [
+          {
+            "key": "unprotected_sex_with_someone_who_is_HIV_positive_or_of_unknown_status",
+            "text": "Unprotected sex with someone who is HIV positive of of unknown status"
+          },
+          {
+            "key": "sex_while_under_the_influence_of_alcohol_and_or_trugs",
+            "text": "Sex while under the influence of alcohol and/or drugs"
+          },
+          {
+            "key": "more_than_one_sexual_partner_in_the_last_12_months",
+            "text": "More than one sexual partner in the last 12 months"
+          }
+        ],
+        "v_required": {
+          "value": "true",
+          "err": "Please select an option"
+        }
+      },
+      {
+        "key": "hts_does_the_client_still_want_to_test",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "",
+        "openmrs_entity_id": "",
+        "type": "native_radio",
+        "label": "Does the client still want to test?",
+        "label_text_style": "bold",
+        "text_color": "#000000",
+        "options": [
+          {
+            "key": "yes",
+            "text": "Yes",
+            "value": true
+          },
+          {
+            "key": "no",
+            "text": "No",
+            "value": true
+          }
+        ],
+        "v_required": {
+          "value": "true",
+          "err": "Please select an option"
+        }
+      }
+    ]
+  }
+}
+
+
