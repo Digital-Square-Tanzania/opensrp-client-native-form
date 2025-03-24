@@ -57,10 +57,10 @@ public class TreeViewFactory implements FormWidgetFactory {
                 if (nameArray.length() > 0) {
                     readableValue = nameArray.getString(nameArray.length() - 1);
 
-                    if (nameArray.length() > 1) {
-                        readableValue = readableValue + ", "
-                                + nameArray.getString(nameArray.length() - 2);
-                    }
+//                    if (nameArray.length() > 1) {
+//                        readableValue = readableValue + ", "
+//                                + nameArray.getString(nameArray.length() - 2);
+//                    }
                 }
             } catch (JSONException e) {
                 Log.e(TAG, Log.getStackTraceString(e));
