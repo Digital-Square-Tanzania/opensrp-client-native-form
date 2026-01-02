@@ -78,6 +78,7 @@ import com.vijay.jsonwizard.utils.PropertyManager;
 import com.vijay.jsonwizard.utils.Utils;
 import com.vijay.jsonwizard.views.CustomTextView;
 import com.vijay.jsonwizard.widgets.CountDownTimerFactory;
+import com.vijay.jsonwizard.widgets.MultiSelectListFactory;
 import com.vijay.jsonwizard.widgets.NumberSelectorFactory;
 
 import org.apache.commons.lang3.StringUtils;
@@ -1236,6 +1237,12 @@ public class JsonFormActivity extends JsonFormBaseActivity implements JsonApi {
 
             updateCanvas(view, visible, canvasViewIds, addressString, object);
             setReadOnlyAndFocus(view, visible, popup);
+            if (!visible && Boolean.TRUE.equals(view.getTag(R.id.is_multiselect_relative_layout))) {
+                Object key = view.getTag(R.id.key);
+                if (key instanceof String) {
+                    MultiSelectListFactory.clearSelection((String) key);
+                }
+            }
 
         } catch (JSONException e) {
             Timber.e(e);

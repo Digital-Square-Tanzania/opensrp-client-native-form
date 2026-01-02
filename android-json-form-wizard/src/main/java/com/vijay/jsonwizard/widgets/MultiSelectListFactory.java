@@ -126,6 +126,26 @@ public class MultiSelectListFactory implements FormWidgetFactory {
         return new ValidationStatus(true, error, fragmentView, multiselectLayout);
     }
 
+    public static void clearSelection(@NonNull String key) {
+        MultiSelectListAccessory multiSelectListAccessory = getMultiSelectListAccessoryHashMap().get(key);
+        if (multiSelectListAccessory == null) {
+            return;
+        }
+        MultiSelectListSelectedAdapter selectedAdapter = multiSelectListAccessory.getSelectedAdapter();
+        if (selectedAdapter != null && selectedAdapter.getData() != null) {
+            selectedAdapter.getData().clear();
+            selectedAdapter.notifyDataSetChanged();
+        }
+        Button actionButton = multiSelectListAccessory.getActionButton();
+        View actionSeparator = multiSelectListAccessory.getActionSeparator();
+        if (actionButton != null) {
+            actionButton.setVisibility(View.VISIBLE);
+        }
+        if (actionSeparator != null) {
+            actionSeparator.setVisibility(View.VISIBLE);
+        }
+    }
+
     private static boolean performValidation(RelativeLayout relativeLayout) {
 
         boolean isSelected = false;
