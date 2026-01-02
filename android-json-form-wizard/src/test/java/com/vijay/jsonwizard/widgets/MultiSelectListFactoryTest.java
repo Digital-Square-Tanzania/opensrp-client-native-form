@@ -72,16 +72,16 @@ public class MultiSelectListFactoryTest extends FactoryTest {
         Thread.sleep(TIMEOUT);
 
         Mockito.verify(multiSelectListFactory, Mockito.times(1))
-                .createActionView(Mockito.eq(jsonFormActivity));
+                .createActionView(Mockito.eq(jsonFormActivity), Mockito.eq(key), Mockito.eq(jsonObject));
 
         Mockito.verify(multiSelectListFactory, Mockito.times(1))
-                .createSelectedRecyclerView(Mockito.eq(jsonFormActivity), Mockito.eq(key));
+                .createSelectedRecyclerView(Mockito.eq(jsonFormActivity), Mockito.eq(key), Mockito.eq(jsonObject));
 
         Mockito.verify(multiSelectListFactory, Mockito.times(1))
-                .prepareListData();
+                .prepareListData(Mockito.eq(jsonObject), Mockito.eq(key));
 
         Mockito.verify(multiSelectListFactory, Mockito.times(1))
-                .prepareSelectedData();
+                .prepareSelectedData(Mockito.eq(jsonObject));
 
         Assert.assertNotNull(multiSelectListFactory.
                 getMultiSelectListAccessoryHashMap().get(key).getAlertDialog());

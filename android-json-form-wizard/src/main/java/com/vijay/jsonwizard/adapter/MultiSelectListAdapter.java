@@ -19,7 +19,7 @@ public class MultiSelectListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private final String currentKey;
     private List<MultiSelectItem> data;
     private List<MultiSelectItem> origData;
-    private static ClickListener clickListener;
+    private ClickListener clickListener;
 
     public MultiSelectListAdapter(List<MultiSelectItem> data, String currentAdapterKey) {
         this.data = data;
@@ -154,6 +154,6 @@ public class MultiSelectListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
     public void setOnClickListener(ClickListener onClickListener) {
-        MultiSelectListAdapter.clickListener = onClickListener;
+        this.clickListener = onClickListener;
     }
 }

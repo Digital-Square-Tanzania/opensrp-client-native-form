@@ -29,10 +29,10 @@ public class MultiSelectListLoadTask {
     private ProgressDialog progressBar;
     private AppExecutors appExecutors;
 
-    public MultiSelectListLoadTask(final MultiSelectListFactory multiSelectListFactory) {
+    public MultiSelectListLoadTask(final MultiSelectListFactory multiSelectListFactory, JSONObject jsonObject, String currentAdapterKey) {
         this.multiSelectListFactory = multiSelectListFactory;
-        this.jsonObject = multiSelectListFactory.jsonObject;
-        this.currentAdapterKey = multiSelectListFactory.currentAdapterKey;
+        this.jsonObject = jsonObject;
+        this.currentAdapterKey = currentAdapterKey;
         appExecutors = multiSelectListFactory.getJsonFormFragment().getJsonApi().getAppExecutors();
 
         appExecutors.mainThread().execute(() -> {
@@ -46,7 +46,7 @@ public class MultiSelectListLoadTask {
     private void init() {
         appExecutors.diskIO().execute(() -> {
             String source = jsonObject.optString(JsonFormConstants.MultiSelectUtils.SOURCE);
-            final List<MultiSelectItem> multiSelectItems = multiSelectListFactory.loadListItems(source);
+            final List<MultiSelectItem> multiSelectItems = multiSelectListFactory.loadListItems(source, jsonObject);
             if (multiSelectItems == null) {
                 return;
             }

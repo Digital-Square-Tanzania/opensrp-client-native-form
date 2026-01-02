@@ -24,7 +24,7 @@ import timber.log.Timber;
 public class MultiSelectListSelectedAdapter extends RecyclerView.Adapter<MultiSelectListSelectedAdapter.MyViewHolder> {
     private List<MultiSelectItem> data;
     private String key;
-    private static ClickListener clickListener;
+    private ClickListener clickListener;
     private MultiSelectListFactory multiSelectListFactory;
 
     public MultiSelectListSelectedAdapter(List<MultiSelectItem> data, String currentKey, MultiSelectListFactory multiSelectListFactory) {
@@ -54,7 +54,7 @@ public class MultiSelectListSelectedAdapter extends RecyclerView.Adapter<MultiSe
                 data.remove(position);
                 notifyDataSetChanged();
                 multiSelectListFactory.writeToForm(key);
-                multiSelectListFactory.showBtnMultiSelectAction();
+                multiSelectListFactory.showBtnMultiSelectAction(key);
             }
         });
         String value = multiSelectItem.getValue();
@@ -113,6 +113,6 @@ public class MultiSelectListSelectedAdapter extends RecyclerView.Adapter<MultiSe
     }
 
     public void setOnClickListener(ClickListener onClickListener) {
-        MultiSelectListSelectedAdapter.clickListener = onClickListener;
+        this.clickListener = onClickListener;
     }
 }

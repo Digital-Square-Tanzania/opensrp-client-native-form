@@ -1,5 +1,8 @@
 package com.vijay.jsonwizard.domain;
 
+import android.view.View;
+import android.widget.Button;
+
 import androidx.appcompat.app.AlertDialog;
 
 import com.vijay.jsonwizard.adapter.MultiSelectListAdapter;
@@ -13,6 +16,8 @@ public class MultiSelectListAccessory {
     private MultiSelectListSelectedAdapter selectedAdapter;
     private MultiSelectListAdapter listAdapter;
     private AlertDialog alertDialog;
+    private Button actionButton;
+    private View actionSeparator;
     private List<MultiSelectItem> selectedItemList;
     private List<MultiSelectItem> itemList;
     private JSONObject formAttributes;
@@ -50,6 +55,22 @@ public class MultiSelectListAccessory {
 
     public void setAlertDialog(AlertDialog alertDialog) {
         this.alertDialog = alertDialog;
+    }
+
+    public Button getActionButton() {
+        return actionButton;
+    }
+
+    public void setActionButton(Button actionButton) {
+        this.actionButton = actionButton;
+    }
+
+    public View getActionSeparator() {
+        return actionSeparator;
+    }
+
+    public void setActionSeparator(View actionSeparator) {
+        this.actionSeparator = actionSeparator;
     }
 
     public List<MultiSelectItem> getItemList() {

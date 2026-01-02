@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -69,6 +68,7 @@ public class MultiSelectListSelectedAdapterTest extends BaseTest {
 
         assertEquals(0, multiSelectListSelectedAdapter.getData().size());
 
-        verify(multiSelectListFactory, only()).writeToForm("");
+        verify(multiSelectListFactory).writeToForm("");
+        verify(multiSelectListFactory).showBtnMultiSelectAction("");
     }
 }
