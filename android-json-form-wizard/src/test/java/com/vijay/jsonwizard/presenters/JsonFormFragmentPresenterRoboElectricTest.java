@@ -65,6 +65,7 @@ import com.vijay.jsonwizard.utils.FormUtils;
 import com.vijay.jsonwizard.views.CustomTextView;
 import com.vijay.jsonwizard.views.JsonFormFragmentView;
 import com.vijay.jsonwizard.widgets.NumberSelectorFactory;
+import com.rey.material.widget.Button;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -365,6 +366,21 @@ public class JsonFormFragmentPresenterRoboElectricTest extends BaseTest {
         ((AppCompatSpinner) formFragment.getJsonApi().getFormDataView("step1:user_spinner")).setSelection(1, false);
         boolean newValid = presenter.areFormViewsFilled();
         assertTrue(newValid);
+    }
+
+    @Test
+    public void testAreFormViewsFilledValidatesRequiredGpsAgainstRawValue() {
+        Button gpsButton = mock(Button.class);
+        when(gpsButton.getTag(R.id.type)).thenReturn(JsonFormConstants.GPS);
+        when(gpsButton.getTag(R.id.v_required)).thenReturn("true");
+        when(gpsButton.isEnabled()).thenReturn(true);
+        when(jsonFormActivity.getFormDataViews()).thenReturn(Collections.singletonList(gpsButton));
+
+        when(gpsButton.getTag(R.id.raw_value)).thenReturn("-1.2334 35 0.0 7.8");
+        assertTrue(presenter.areFormViewsFilled());
+
+        when(gpsButton.getTag(R.id.raw_value)).thenReturn("");
+        assertFalse(presenter.areFormViewsFilled());
     }
 
     private void setTextValue(String address, String value) {

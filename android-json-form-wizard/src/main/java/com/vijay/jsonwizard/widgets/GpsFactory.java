@@ -58,11 +58,16 @@ public class GpsFactory implements FormWidgetFactory {
             return new ValidationStatus(true, null, formFragmentView, recordButton);
         }
         Boolean isRequired = Boolean.valueOf((String) recordButton.getTag(R.id.v_required));
-        if (!isRequired || !recordButton.isEnabled()) {
+        if (!isRequired || !recordButton.isEnabled() || hasValue(recordButton)) {
             return new ValidationStatus(true, null, formFragmentView, recordButton);
         }
 
         return new ValidationStatus(false, (String) recordButton.getTag(R.id.error), formFragmentView, recordButton);
+    }
+
+    public static boolean hasValue(Button recordButton) {
+        return recordButton.getTag(R.id.raw_value) instanceof String
+                && StringUtils.isNotBlank((String) recordButton.getTag(R.id.raw_value));
     }
 
     public static String constructString(Location location) {
