@@ -418,10 +418,10 @@ public class JsonFormFragmentPresenter extends
             } else if (childView instanceof Button) {
                 String type = (String) childView.getTag(R.id.type);
                 if (!TextUtils.isEmpty(type) && type.equals(JsonFormConstants.GPS)) {
-                    boolean isRequired = ((childView.getTag(R.id.v_required) instanceof String) || (childView.getTag(R.id.error) instanceof String)
-                            && childView.isEnabled()
-                            && Boolean.parseBoolean((String) childView.getTag(R.id.v_required)));
-                    filled = filled && !isRequired;
+                    boolean isRequired = childView.isEnabled()
+                            && childView.getTag(R.id.v_required) instanceof String
+                            && Boolean.parseBoolean((String) childView.getTag(R.id.v_required));
+                    filled = filled && (!isRequired || GpsFactory.hasValue((Button) childView));
                 }
 
             } else if (childView instanceof MaterialSpinner) {

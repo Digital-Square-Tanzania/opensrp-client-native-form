@@ -15,6 +15,7 @@ import com.vijay.jsonwizard.fragments.JsonFormFragment;
 import com.vijay.jsonwizard.interfaces.CommonListener;
 import com.vijay.jsonwizard.utils.AppExecutors;
 import com.vijay.jsonwizard.utils.FormUtils;
+import com.vijay.jsonwizard.views.JsonFormFragmentView;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -178,5 +179,27 @@ public class GpsFactoryTest extends BaseTest {
 
         Mockito.verify(recordButton, Mockito.atLeastOnce())
                 .setTag(Mockito.eq(R.id.raw_value), Mockito.eq(""));
+    }
+
+    @Test
+    public void testValidateReturnsInvalidWhenRequiredGpsHasNoValue() {
+        JsonFormFragmentView formFragmentView = Mockito.mock(JsonFormFragmentView.class);
+        Mockito.doReturn("true").when(recordButton).getTag(R.id.v_required);
+        Mockito.doReturn("Location is required").when(recordButton).getTag(R.id.error);
+        Mockito.doReturn("").when(recordButton).getTag(R.id.raw_value);
+        Mockito.doReturn(true).when(recordButton).isEnabled();
+
+        Assert.assertFalse(GpsFactory.validate(formFragmentView, recordButton).isValid());
+    }
+
+    @Test
+    public void testValidateReturnsValidWhenRequiredGpsHasValue() {
+        JsonFormFragmentView formFragmentView = Mockito.mock(JsonFormFragmentView.class);
+        Mockito.doReturn("true").when(recordButton).getTag(R.id.v_required);
+        Mockito.doReturn("Location is required").when(recordButton).getTag(R.id.error);
+        Mockito.doReturn("-1.2334 35 0.0 7.8").when(recordButton).getTag(R.id.raw_value);
+        Mockito.doReturn(true).when(recordButton).isEnabled();
+
+        Assert.assertTrue(GpsFactory.validate(formFragmentView, recordButton).isValid());
     }
 }
