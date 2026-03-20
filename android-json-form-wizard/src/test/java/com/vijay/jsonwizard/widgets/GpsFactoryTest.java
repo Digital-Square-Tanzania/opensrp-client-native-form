@@ -3,6 +3,7 @@ package com.vijay.jsonwizard.widgets;
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.rey.material.widget.Button;
 import com.rey.material.widget.TextView;
@@ -48,7 +49,7 @@ public class GpsFactoryTest extends BaseTest {
     private CommonListener listener;
 
     @Mock
-    private View rootLayout;
+    private LinearLayout rootLayout;
 
     @Mock
     private TextView latitudeTV;
@@ -61,6 +62,9 @@ public class GpsFactoryTest extends BaseTest {
 
     @Mock
     private TextView accuracyTV;
+
+    @Mock
+    private TextView errorTextView;
 
     @Mock
     private Button recordButton;
@@ -188,8 +192,12 @@ public class GpsFactoryTest extends BaseTest {
         Mockito.doReturn("Location is required").when(recordButton).getTag(R.id.error);
         Mockito.doReturn("").when(recordButton).getTag(R.id.raw_value);
         Mockito.doReturn(true).when(recordButton).isEnabled();
+        Mockito.doReturn(rootLayout).when(recordButton).getParent();
+        Mockito.doReturn(errorTextView).when(rootLayout).findViewById(R.id.error_textView);
 
         Assert.assertFalse(GpsFactory.validate(formFragmentView, recordButton).isValid());
+        Mockito.verify(errorTextView).setText("Location is required");
+        Mockito.verify(errorTextView).setVisibility(View.VISIBLE);
     }
 
     @Test
@@ -199,7 +207,11 @@ public class GpsFactoryTest extends BaseTest {
         Mockito.doReturn("Location is required").when(recordButton).getTag(R.id.error);
         Mockito.doReturn("-1.2334 35 0.0 7.8").when(recordButton).getTag(R.id.raw_value);
         Mockito.doReturn(true).when(recordButton).isEnabled();
+        Mockito.doReturn(rootLayout).when(recordButton).getParent();
+        Mockito.doReturn(errorTextView).when(rootLayout).findViewById(R.id.error_textView);
 
         Assert.assertTrue(GpsFactory.validate(formFragmentView, recordButton).isValid());
+        Mockito.verify(errorTextView).setText(null);
+        Mockito.verify(errorTextView).setVisibility(View.GONE);
     }
 }
