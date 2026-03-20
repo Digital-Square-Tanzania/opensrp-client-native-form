@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewParent;
 
 import com.rey.material.util.ViewUtil;
 import com.rey.material.widget.Button;
@@ -55,14 +56,54 @@ public class GpsFactory implements FormWidgetFactory {
     public static ValidationStatus validate(JsonFormFragmentView formFragmentView,
                                             Button recordButton) {
         if (!(recordButton.getTag(R.id.v_required) instanceof String) || !(recordButton.getTag(R.id.error) instanceof String)) {
+            clearValidationError(recordButton);
             return new ValidationStatus(true, null, formFragmentView, recordButton);
         }
         Boolean isRequired = Boolean.valueOf((String) recordButton.getTag(R.id.v_required));
         if (!isRequired || !recordButton.isEnabled() || hasValue(recordButton)) {
+            clearValidationError(recordButton);
             return new ValidationStatus(true, null, formFragmentView, recordButton);
         }
 
-        return new ValidationStatus(false, (String) recordButton.getTag(R.id.error), formFragmentView, recordButton);
+        String errorMessage = (String) recordButton.getTag(R.id.error);
+        showValidationError(recordButton, errorMessage);
+        return new ValidationStatus(false, errorMessage, formFragmentView, recordButton);
+    }
+
+    public static void clearValidationError(View dataView) {
+        updateValidationError(dataView, null);
+    }
+
+    private static void showValidationError(View dataView, String errorMessage) {
+        updateValidationError(dataView, errorMessage);
+    }
+
+    private static void updateValidationError(View dataView, String errorMessage) {
+        TextView errorTextView = getErrorTextView(dataView);
+        if (errorTextView == null) {
+            return;
+        }
+
+        if (StringUtils.isBlank(errorMessage)) {
+            errorTextView.setText(null);
+            errorTextView.setVisibility(View.GONE);
+        } else {
+            errorTextView.setText(errorMessage);
+            errorTextView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private static TextView getErrorTextView(View dataView) {
+        if (dataView == null) {
+            return null;
+        }
+
+        ViewParent parent = dataView.getParent();
+        if (parent instanceof View) {
+            return ((View) parent).findViewById(R.id.error_textView);
+        }
+
+        return null;
     }
 
     public static boolean hasValue(Button recordButton) {

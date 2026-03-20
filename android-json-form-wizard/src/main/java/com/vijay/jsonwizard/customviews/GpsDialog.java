@@ -123,6 +123,7 @@ public class GpsDialog extends Dialog implements LocationListener, GoogleApiClie
             altitudeTV.setText(String.format(context.getString(R.string.altitude), String.valueOf(location.getAltitude()) + " m"));
             accuracyTV.setText(String.format(context.getString(R.string.accuracy), String.valueOf(location.getAccuracy()) + " m"));
             dataView.setTag(R.id.raw_value, GpsFactory.constructString(location));
+            GpsFactory.clearValidationError(dataView);
         }
     }
 

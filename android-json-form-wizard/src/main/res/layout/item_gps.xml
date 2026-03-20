@@ -60,5 +60,15 @@
             android:text="@string/accuracy" />
     </LinearLayout>
 
+    <com.rey.material.widget.TextView
+        android:id="@+id/error_textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_bottom_margin"
+        android:layout_marginStart="@dimen/inner_components_spacing"
+        android:layout_marginEnd="@dimen/inner_components_spacing"
+        android:textColor="@color/toaster_note_red_icon"
+        android:textSize="@dimen/default_text_size"
+        android:visibility="gone" />
 
 </LinearLayout>
