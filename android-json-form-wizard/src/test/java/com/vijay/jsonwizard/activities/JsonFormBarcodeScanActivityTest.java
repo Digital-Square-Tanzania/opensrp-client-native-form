@@ -1,79 +1,95 @@
 package com.vijay.jsonwizard.activities;
 
-import android.util.Log;
-import android.util.SparseArray;
+import android.app.Activity;
+import android.content.Intent;
 
-import com.google.android.gms.vision.Detector;
-import com.google.android.gms.vision.barcode.Barcode;
+import com.vijay.jsonwizard.barcode.BarcodeScanResult;
+import com.vijay.jsonwizard.barcode.BarcodeScanner;
+import com.vijay.jsonwizard.barcode.BarcodeScannerFactory;
+import com.vijay.jsonwizard.utils.barcode.JsonFormCameraSourcePreview;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.powermock.reflect.Whitebox;
 import org.robolectric.Robolectric;
+import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
 
-@Ignore
 public class JsonFormBarcodeScanActivityTest extends BaseActivityTest {
 
-    private JsonFormBarcodeScanActivity barcodeScanActivity;
-    private ActivityController<JsonFormBarcodeScanActivity> controller;
+    public static class TestJsonFormBarcodeScanActivity extends JsonFormBarcodeScanActivity {
+        static BarcodeScannerFactory barcodeScannerFactory;
+
+        @Override
+        protected BarcodeScannerFactory getBarcodeScannerFactory() {
+            return barcodeScannerFactory;
+        }
+    }
+
+    private ActivityController<TestJsonFormBarcodeScanActivity> controller;
+    private TestJsonFormBarcodeScanActivity barcodeScanActivity;
 
     @Mock
-    private SparseArray<Barcode> barcodeSparseArray;
+    private BarcodeScannerFactory barcodeScannerFactory;
 
     @Mock
-    private Detector.Detections<Barcode> detections;
+    private BarcodeScanner barcodeScanner;
+
+    @Mock
+    private BarcodeScanner fallbackBarcodeScanner;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        controller = Robolectric.buildActivity(JsonFormBarcodeScanActivity.class).create().start();
+        TestJsonFormBarcodeScanActivity.barcodeScannerFactory = barcodeScannerFactory;
+        Mockito.doReturn(barcodeScanner).when(barcodeScannerFactory)
+                .create(ArgumentMatchers.any(Activity.class), ArgumentMatchers.any(JsonFormCameraSourcePreview.class),
+                        ArgumentMatchers.any(BarcodeScanner.Callback.class));
+        Mockito.doReturn(fallbackBarcodeScanner).when(barcodeScannerFactory)
+                .createFallbackScanner(ArgumentMatchers.any(Activity.class), ArgumentMatchers.any(BarcodeScanner.Callback.class));
+        controller = Robolectric.buildActivity(TestJsonFormBarcodeScanActivity.class).create().start().resume();
         barcodeScanActivity = controller.get();
     }
 
     @After
     public void tearDown() {
-        destroyController();
+        TestJsonFormBarcodeScanActivity.barcodeScannerFactory = null;
+        controller.pause().stop().destroy();
     }
 
     @Test
-    public void testActivityCreatedSuccessfully() {
-        Assert.assertNotNull(barcodeScanActivity);
-    }
+    public void testCloseActivityWritesProviderNeutralExtras() {
+        barcodeScanActivity.closeBarcodeActivity(new BarcodeScanResult("test-value", "QR_CODE"));
 
-    @Test
-    public void testCloseActivitySuccessfully() {
-        barcodeScanActivity.closeBarcodeActivity(barcodeSparseArray);
         Assert.assertTrue(barcodeScanActivity.isFinishing());
+        Intent resultIntent = Shadows.shadowOf(barcodeScanActivity).getResultIntent();
+        Assert.assertEquals(Activity.RESULT_OK, Shadows.shadowOf(barcodeScanActivity).getResultCode());
+        Assert.assertEquals("test-value", resultIntent.getStringExtra("barcode_value"));
+        Assert.assertEquals("QR_CODE", resultIntent.getStringExtra("barcode_format"));
     }
 
     @Test
-    public void testReceiveDetections() {
-        Assert.assertNotNull(detections);
-        Mockito.doReturn(barcodeSparseArray).when(detections).getDetectedItems();
-        Assert.assertNotNull(barcodeSparseArray);
-        Assert.assertEquals(0, barcodeSparseArray.size());
-        Whitebox.setInternalState(barcodeSparseArray.size(), 2);
-        Assert.assertEquals(2, barcodeSparseArray.size());
+    public void testCancelledScanReturnsCancelledResult() {
+        barcodeScanActivity.onScanCancelled();
 
-        barcodeScanActivity.receiveDetections(detections);
+        Assert.assertTrue(barcodeScanActivity.isFinishing());
+        Assert.assertEquals(Activity.RESULT_CANCELED, Shadows.shadowOf(barcodeScanActivity).getResultCode());
     }
 
-    private void destroyController() {
-        try {
-            barcodeScanActivity.finish();
-            controller.pause().stop().destroy(); //destroy controller if we can
+    @Test
+    public void testScannerErrorSwitchesToAospFallback() {
+        Mockito.doReturn(true).when(barcodeScanner).isUsingGoogleScanner();
 
-        } catch (Exception e) {
-            Log.e(getClass().getCanonicalName(), e.getMessage());
-        }
+        barcodeScanActivity.onScannerError(true);
 
-        System.gc();
+        Mockito.verify(barcodeScanner).stop();
+        Mockito.verify(barcodeScanner).release();
+        Mockito.verify(barcodeScannerFactory).createFallbackScanner(barcodeScanActivity, barcodeScanActivity);
+        Mockito.verify(fallbackBarcodeScanner).start();
     }
 }
