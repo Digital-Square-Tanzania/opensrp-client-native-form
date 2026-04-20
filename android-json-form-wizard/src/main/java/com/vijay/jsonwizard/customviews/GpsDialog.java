@@ -4,35 +4,48 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.location.Location;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.rey.material.widget.TextView;
 import com.vijay.jsonwizard.R;
+import com.vijay.jsonwizard.location.GpsLocationProvider;
+import com.vijay.jsonwizard.location.GpsLocationProviderFactory;
 import com.vijay.jsonwizard.widgets.GpsFactory;
+
+import timber.log.Timber;
 
 /**
  * Created by Jason Rogena - jrogena@ona.io on 11/24/17.
  */
-public class GpsDialog extends Dialog implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    private final double MIN_ACCURACY = 4d;
+public class GpsDialog extends Dialog {
+    private static final double MIN_ACCURACY = 5d;
+    private static final long LOCATION_FIX_TIMEOUT_MILLIS = 30 * 1000L;
+
     private final View dataView;
-    private final TextView latitudeTV, longitudeTV, altitudeTV, accuracyTV;
+    private final TextView latitudeTV;
+    private final TextView longitudeTV;
+    private final TextView altitudeTV;
+    private final TextView accuracyTV;
     private final Context context;
+    private final GpsLocationProviderFactory locationProviderFactory;
+    private final Handler handler;
+    private final Runnable locationTimeoutRunnable;
+
     private TextView dialogAccuracyTV;
-    private GoogleApiClient googleApiClient;
+    private GpsLocationProvider locationProvider;
     private Location lastLocation;
+    private boolean usingPlatformFallback;
 
     public GpsDialog(Context context, View dataView, TextView latitudeTV, TextView longitudeTV, TextView altitudeTV, TextView accuracyTV) {
+        this(context, dataView, latitudeTV, longitudeTV, altitudeTV, accuracyTV, new GpsLocationProviderFactory());
+    }
+
+    GpsDialog(Context context, View dataView, TextView latitudeTV, TextView longitudeTV,
+              TextView altitudeTV, TextView accuracyTV, GpsLocationProviderFactory locationProviderFactory) {
         super(context);
         this.context = context;
         this.dataView = dataView;
@@ -40,28 +53,41 @@ public class GpsDialog extends Dialog implements LocationListener, GoogleApiClie
         this.longitudeTV = longitudeTV;
         this.altitudeTV = altitudeTV;
         this.accuracyTV = accuracyTV;
+        this.locationProviderFactory = locationProviderFactory;
+        this.handler = new Handler(Looper.getMainLooper());
+        this.locationTimeoutRunnable = new Runnable() {
+            @Override
+            public void run() {
+                handleLocationTimeout();
+            }
+        };
         init();
     }
 
     protected void init() {
-        this.setContentView(R.layout.dialog_gps);
+        Timber.i("GPS dialog: initializing");
+        setContentView(R.layout.dialog_gps);
         setTitle(R.string.loading_location);
-        this.setCancelable(false);
-        this.lastLocation = null;
-        this.setOnDismissListener(new OnDismissListener() {
+        setCancelable(false);
+        lastLocation = null;
+        setOnDismissListener(new OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
-                disconnectGoogleApiClient();
+                Timber.i("GPS dialog: dismissed");
+                cancelLocationTimeout();
+                stopLocationUpdates();
             }
         });
-        Button okButton = (Button) this.findViewById(R.id.ok_button);
+
+        Button okButton = findViewById(R.id.ok_button);
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 saveAndDismiss();
             }
         });
-        Button cancelButton = (Button) this.findViewById(R.id.cancel_button);
+
+        Button cancelButton = findViewById(R.id.cancel_button);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -69,55 +95,139 @@ public class GpsDialog extends Dialog implements LocationListener, GoogleApiClie
             }
         });
 
-        this.dialogAccuracyTV = (TextView) this.findViewById(R.id.accuracy);
+        dialogAccuracyTV = findViewById(R.id.accuracy);
 
-        this.setOnShowListener(new OnShowListener() {
+        setOnShowListener(new OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
-                initGoogleApiClient();
+                Timber.i("GPS dialog: shown, starting location updates");
+                startLocationUpdates(true);
             }
         });
     }
 
     protected void saveAndDismiss() {
+        Timber.i("GPS dialog: saving and dismissing with location=%s", describeLocation(lastLocation));
         updateLocationViews(lastLocation);
-        GpsDialog.this.dismiss();
+        dismiss();
     }
 
-    protected void initGoogleApiClient() {
-        if (googleApiClient == null) {
-            googleApiClient = new GoogleApiClient.Builder(context)
-                    .addApi(LocationServices.API)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .build();
+    protected void startLocationUpdates(boolean preferGooglePlayServices) {
+        Timber.i("GPS dialog: startLocationUpdates preferGooglePlayServices=%s", preferGooglePlayServices);
+        cancelLocationTimeout();
+        stopLocationUpdates();
+        locationProvider = locationProviderFactory.create(context, getLocationCallback(), preferGooglePlayServices);
+        usingPlatformFallback = !locationProvider.isUsingGooglePlayServices();
+        Timber.i("GPS dialog: using provider=%s, usingPlatformFallback=%s",
+                locationProvider.getClass().getSimpleName(), usingPlatformFallback);
+        locationProvider.start();
+        scheduleLocationTimeout();
+    }
+
+    private void switchToPlatformFallback() {
+        Timber.w("GPS dialog: switching to platform fallback provider");
+        startLocationUpdates(false);
+    }
+
+    private void stopLocationUpdates() {
+        if (locationProvider != null) {
+            Timber.i("GPS dialog: stopping provider=%s", locationProvider.getClass().getSimpleName());
+            locationProvider.stop();
+            locationProvider = null;
+        }
+    }
+
+    private void scheduleLocationTimeout() {
+        Timber.i("GPS dialog: scheduling timeout in %s ms", LOCATION_FIX_TIMEOUT_MILLIS);
+        handler.postDelayed(locationTimeoutRunnable, LOCATION_FIX_TIMEOUT_MILLIS);
+    }
+
+    private void cancelLocationTimeout() {
+        Timber.i("GPS dialog: cancelling timeout");
+        handler.removeCallbacks(locationTimeoutRunnable);
+    }
+
+    private void handleLocationTimeout() {
+        Timber.w("GPS dialog: timeout fired, lastLocation=%s, usingPlatformFallback=%s, provider=%s",
+                describeLocation(lastLocation), usingPlatformFallback,
+                locationProvider != null ? locationProvider.getClass().getSimpleName() : "null");
+        if (lastLocation != null) {
+            return;
         }
 
-        googleApiClient.connect();
+        if (locationProvider != null && locationProvider.isUsingGooglePlayServices() && !usingPlatformFallback) {
+            switchToPlatformFallback();
+            return;
+        }
+
+        stopLocationUpdates();
+        Toast.makeText(context, R.string.could_not_get_your_location, Toast.LENGTH_LONG).show();
+        dismiss();
     }
 
-    private void disconnectGoogleApiClient() {
-        if (googleApiClient != null) {
-            googleApiClient.disconnect();
+    private GpsLocationProvider.Callback getLocationCallback() {
+        return new GpsLocationProvider.Callback() {
+            @Override
+            public void onLocationUpdate(Location location) {
+                onLocationReceived(location);
+            }
+
+            @Override
+            public void onLocationError(int errorResId, boolean canFallbackToPlatform) {
+                onLocationProviderError(errorResId, canFallbackToPlatform);
+            }
+        };
+    }
+
+    private void onLocationReceived(Location location) {
+        if (location == null) {
+            Timber.w("GPS dialog: received null location");
+            return;
+        }
+
+        Timber.i("GPS dialog: received location=%s", describeLocation(location));
+        cancelLocationTimeout();
+        lastLocation = location;
+        updateDialogAccuracy(location);
+        if (lastLocation.getAccuracy() <= MIN_ACCURACY) {
+            Timber.i("GPS dialog: accuracy threshold met (%s <= %s), auto-saving",
+                    lastLocation.getAccuracy(), MIN_ACCURACY);
+            saveAndDismiss();
+        } else {
+            Timber.i("GPS dialog: accuracy threshold not met yet (%s > %s), waiting for better fix",
+                    lastLocation.getAccuracy(), MIN_ACCURACY);
         }
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(5000);
-        locationRequest.setFastestInterval(1000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    private void onLocationProviderError(int errorResId, boolean canFallbackToPlatform) {
+        Timber.w("GPS dialog: provider error errorResId=%s canFallbackToPlatform=%s provider=%s",
+                errorResId, canFallbackToPlatform,
+                locationProvider != null ? locationProvider.getClass().getSimpleName() : "null");
+        if (canFallbackToPlatform && locationProvider != null
+                && locationProvider.isUsingGooglePlayServices() && !usingPlatformFallback) {
+            switchToPlatformFallback();
+            return;
+        }
 
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+        cancelLocationTimeout();
+        stopLocationUpdates();
+        Toast.makeText(context, errorResId, Toast.LENGTH_LONG).show();
+        if (lastLocation == null) {
+            dismiss();
+        }
+    }
 
-        lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+    private void updateDialogAccuracy(Location location) {
+        if (location != null && dialogAccuracyTV != null) {
+            Timber.i("GPS dialog: updating dialog accuracy text accuracy=%s", location.getAccuracy());
+            dialogAccuracyTV.setText(String.format(context.getString(R.string.accuracy),
+                    String.valueOf(location.getAccuracy()) + " m"));
+        }
     }
 
     private void updateLocationViews(Location location) {
         if (location != null) {
-            location.getProvider();
-
+            Timber.i("GPS dialog: writing location to views location=%s", describeLocation(location));
             latitudeTV.setText(String.format(context.getString(R.string.latitude), String.valueOf(location.getLatitude())));
             longitudeTV.setText(String.format(context.getString(R.string.longitude), String.valueOf(location.getLongitude())));
             altitudeTV.setText(String.format(context.getString(R.string.altitude), String.valueOf(location.getAltitude()) + " m"));
@@ -127,27 +237,17 @@ public class GpsDialog extends Dialog implements LocationListener, GoogleApiClie
         }
     }
 
-    @Override
-    public void onConnectionSuspended(int i) {
-        // Do nothing when the connection is suspended - This is bad and probably needs a review
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        this.dismiss();
-        Toast.makeText(context, R.string.could_not_get_your_location, Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        if (location != null) {
-            dialogAccuracyTV.setText(String.format(context.getString(R.string.accuracy), String.valueOf(location.getAccuracy()) + " m"));
+    private String describeLocation(Location location) {
+        if (location == null) {
+            return "null";
         }
 
-        lastLocation = location;
-        if (lastLocation != null && lastLocation.getAccuracy() <= MIN_ACCURACY) {
-            saveAndDismiss();
-        }
+        return "provider=" + location.getProvider()
+                + ", lat=" + location.getLatitude()
+                + ", lon=" + location.getLongitude()
+                + ", accuracy=" + location.getAccuracy()
+                + ", time=" + location.getTime()
+                + ", elapsedRealtimeNanos=" + location.getElapsedRealtimeNanos();
     }
 
     public View getDataView() {

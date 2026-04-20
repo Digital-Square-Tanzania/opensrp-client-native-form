@@ -212,6 +212,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
         exclude group: 'com.android.support', module: 'recyclerview-v7'
     }
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
 
     implementation 'org.smartregister:opensrp-client-utils:0.0.6-SNAPSHOT'
     implementation 'androidx.test:core:1.4.0'

@@ -310,8 +310,10 @@ public class GpsFactory implements FormWidgetFactory {
     public void requestPermissionsForLocation(Context context) {
         if (context instanceof Activity) {
             Activity activity = (Activity) context;
+            Timber.i("GpsFactory: requestPermissionsForLocation activity=%s", activity.getClass().getSimpleName());
 
             if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Timber.w("GpsFactory: ACCESS_FINE_LOCATION not granted, requesting permission");
                 // Register the RequestPermissionResult listener
                 if (activity instanceof JsonApi) {
                     final JsonApi jsonApi = (JsonApi) activity;
@@ -319,8 +321,10 @@ public class GpsFactory implements FormWidgetFactory {
                         @Override
                         public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) {
                             if (PermissionUtils.verifyPermissionGranted(permissions, grantResults, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                                Timber.i("GpsFactory: ACCESS_FINE_LOCATION granted from permission callback");
                                 showGpsDialog();
                             } else {
+                                Timber.w("GpsFactory: ACCESS_FINE_LOCATION denied from permission callback");
                                 jsonApi.removeOnActivityRequestPermissionResultListener(PermissionUtils.FINE_LOCATION_PERMISSION_REQUEST_CODE);
                             }
                         }
@@ -329,12 +333,14 @@ public class GpsFactory implements FormWidgetFactory {
 
                 ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PermissionUtils.FINE_LOCATION_PERMISSION_REQUEST_CODE);
             } else {
+                Timber.i("GpsFactory: ACCESS_FINE_LOCATION already granted, showing GPS dialog");
                 showGpsDialog();
             }
         }
     }
 
     protected void showGpsDialog() {
+        Timber.i("GpsFactory: showing GPS dialog");
         gpsDialog.show();
     }
 
