@@ -23,7 +23,7 @@ import timber.log.Timber;
  */
 public class GpsDialog extends Dialog {
     private static final double MIN_ACCURACY = 5d;
-    private static final long LOCATION_FIX_TIMEOUT_MILLIS = 30 * 1000L;
+    private static final long LOCATION_FIX_TIMEOUT_MILLIS = 60 * 1000L;
 
     private final View dataView;
     private final TextView latitudeTV;
