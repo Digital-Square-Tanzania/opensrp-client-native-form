@@ -14,6 +14,8 @@ import com.vijay.jsonwizard.constants.JsonFormConstants;
 import com.vijay.jsonwizard.customviews.GpsDialog;
 import com.vijay.jsonwizard.fragments.JsonFormFragment;
 import com.vijay.jsonwizard.interfaces.CommonListener;
+import com.vijay.jsonwizard.location.GpsLocationProvider;
+import com.vijay.jsonwizard.location.GpsLocationProviderFactory;
 import com.vijay.jsonwizard.utils.AppExecutors;
 import com.vijay.jsonwizard.utils.FormUtils;
 import com.vijay.jsonwizard.views.JsonFormFragmentView;
@@ -72,12 +74,18 @@ public class GpsFactoryTest extends BaseTest {
     @Mock
     private GpsDialog gpsDialog;
 
+    @Mock
+    private GpsLocationProviderFactory locationProviderFactory;
+
+    @Mock
+    private GpsLocationProvider warmUpLocationProvider;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(formFragment.getJsonApi()).thenReturn(context);
         when(context.getAppExecutors()).thenReturn(new AppExecutors());
-        factory = new GpsFactory();
+        factory = new GpsFactory(locationProviderFactory);
     }
 
     @Test
@@ -213,5 +221,50 @@ public class GpsFactoryTest extends BaseTest {
         Assert.assertTrue(GpsFactory.validate(formFragmentView, recordButton).isValid());
         Mockito.verify(errorTextView).setText(null);
         Mockito.verify(errorTextView).setVisibility(View.GONE);
+    }
+
+    @Test
+    public void testStartLocationWarmUpStartsProviderWhenPermissionGranted() {
+        GpsFactory factorySpy = Mockito.spy(factory);
+        Mockito.doReturn(true).when(factorySpy).hasFineLocationPermission(context);
+        Mockito.doReturn(true).when(recordButton).isEnabled();
+        Mockito.doReturn(warmUpLocationProvider).when(locationProviderFactory)
+                .create(Mockito.eq(context), Mockito.any(GpsLocationProvider.Callback.class), Mockito.eq(true));
+
+        factorySpy.startLocationWarmUp(context, recordButton);
+        factorySpy.startLocationWarmUp(context, recordButton);
+
+        Mockito.verify(locationProviderFactory, Mockito.times(1))
+                .create(Mockito.eq(context), Mockito.any(GpsLocationProvider.Callback.class), Mockito.eq(true));
+        Mockito.verify(warmUpLocationProvider, Mockito.times(1)).start();
+    }
+
+    @Test
+    public void testStartLocationWarmUpSkipsProviderWhenPermissionMissing() {
+        GpsFactory factorySpy = Mockito.spy(factory);
+        Mockito.doReturn(false).when(factorySpy).hasFineLocationPermission(context);
+        Mockito.doReturn(true).when(recordButton).isEnabled();
+
+        factorySpy.startLocationWarmUp(context, recordButton);
+
+        Mockito.verify(locationProviderFactory, Mockito.never())
+                .create(Mockito.eq(context), Mockito.any(GpsLocationProvider.Callback.class), Mockito.anyBoolean());
+        Mockito.verify(warmUpLocationProvider, Mockito.never()).start();
+    }
+
+    @Test
+    public void testShowGpsDialogStopsWarmUpBeforeOpeningStrictCaptureDialog() {
+        GpsFactory factorySpy = Mockito.spy(factory);
+        Mockito.doReturn(true).when(factorySpy).hasFineLocationPermission(context);
+        Mockito.doReturn(true).when(recordButton).isEnabled();
+        Mockito.doReturn(warmUpLocationProvider).when(locationProviderFactory)
+                .create(Mockito.eq(context), Mockito.any(GpsLocationProvider.Callback.class), Mockito.eq(true));
+
+        factorySpy.gpsDialog = gpsDialog;
+        factorySpy.startLocationWarmUp(context, recordButton);
+        factorySpy.showGpsDialog();
+
+        Mockito.verify(warmUpLocationProvider).stop();
+        Mockito.verify(gpsDialog).show();
     }
 }
