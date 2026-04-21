@@ -59,16 +59,9 @@ android {
     defaultConfig {
         minSdkVersion androidMinSdkVersion
         targetSdkVersion androidTargetSdkVersion
-        versionCode Integer.parseInt(project.VERSION_CODE)
-        versionName project.VERSION_NAME
         multiDexEnabled true
         testInstrumentationRunner "com.android.test.runner.MultiDexTestRunner"
 
-        javaCompileOptions {
-            annotationProcessorOptions {
-                includeCompileClasspath = true
-            }
-        }
         project.archivesBaseName = "opensrp-client-native-form"
     }
 
@@ -163,9 +156,12 @@ publishing {
                         }
                     }
                 }
-                configurations.compile.getDependencies().each { dep -> addDependency(dep, 'compile') }
-                configurations.api.getDependencies().each { dep -> addDependency(dep, 'compile') }
-                configurations.implementation.getDependencies().each { dep -> addDependency(dep, 'compile') }
+                ['compile', 'api', 'implementation'].each { configName ->
+                    def config = configurations.findByName(configName)
+                    if (config != null) {
+                        config.getDependencies().each { dep -> addDependency(dep, 'compile') }
+                    }
+                }
             }
 
         }
@@ -313,12 +309,17 @@ coveralls {
 }
 
 
-apply from: '../maven.gradle'
+if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version('7.0')) {
+    apply from: '../maven.gradle'
+}
 
 task javadoc(type: Javadoc) {
     failOnError false
     def mainSrc = "$project.projectDir/src/main/java"
     source = files([mainSrc])
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    classpath += configurations.compile
+    def javadocClasspath = configurations.findByName('compileClasspath') ?: configurations.findByName('debugCompileClasspath')
+    if (javadocClasspath != null) {
+        classpath += javadocClasspath
+    }
 }
