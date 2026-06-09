@@ -25,8 +25,8 @@ import android.widget.BaseAdapter;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
-import com.nineoldandroids.animation.ObjectAnimator;
-import com.nineoldandroids.animation.ValueAnimator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import com.vijay.jsonwizard.R;
 
 
