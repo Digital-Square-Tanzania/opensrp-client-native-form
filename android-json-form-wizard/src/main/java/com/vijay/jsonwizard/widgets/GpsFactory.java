@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -90,18 +91,30 @@ public class GpsFactory implements FormWidgetFactory {
         updateValidationError(dataView, errorMessage);
     }
 
-    private static void updateValidationError(View dataView, String errorMessage) {
-        TextView errorTextView = getErrorTextView(dataView);
-        if (errorTextView == null) {
+    private static void updateValidationError(final View dataView, final String errorMessage) {
+        if (dataView == null) {
             return;
         }
 
-        if (StringUtils.isBlank(errorMessage)) {
-            errorTextView.setText(null);
-            errorTextView.setVisibility(View.GONE);
+        Runnable updateRunnable = () -> {
+            TextView errorTextView = getErrorTextView(dataView);
+            if (errorTextView == null) {
+                return;
+            }
+
+            if (StringUtils.isBlank(errorMessage)) {
+                errorTextView.setText(null);
+                errorTextView.setVisibility(View.GONE);
+            } else {
+                errorTextView.setText(errorMessage);
+                errorTextView.setVisibility(View.VISIBLE);
+            }
+        };
+
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            updateRunnable.run();
         } else {
-            errorTextView.setText(errorMessage);
-            errorTextView.setVisibility(View.VISIBLE);
+            dataView.post(updateRunnable);
         }
     }
 
