@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RelativeLayout;
 
-import com.google.android.gms.vision.barcode.Barcode;
+import com.vijay.jsonwizard.barcode.BarcodeScanResult;
 import com.rengwuxian.materialedittext.MaterialEditText;
 import com.rey.material.util.ViewUtil;
 import com.rey.material.widget.Button;
@@ -163,11 +163,14 @@ public class BarcodeFactory implements FormWidgetFactory {
                                                      int resultCode, Intent data) {
                             if (requestCode == JsonFormConstants.BARCODE_CONSTANTS.BARCODE_REQUEST_CODE && resultCode == RESULT_OK) {
                                 if (data != null) {
-                                    Barcode barcode = data.getParcelableExtra(JsonFormConstants.BARCODE_CONSTANTS.BARCODE_KEY);
-                                    Timber.d("Scanned QR Code %s ", barcode.displayValue);
-                                    editText.setText(barcode.displayValue);
-                                } else
+                                    BarcodeScanResult barcodeScanResult = BarcodeScanResult.fromIntent(data);
+                                    if (barcodeScanResult != null) {
+                                        Timber.d("Scanned QR Code %s ", barcodeScanResult.getValue());
+                                        editText.setText(barcodeScanResult.getValue());
+                                    }
+                                } else {
                                     Timber.i("NO RESULT FOR QR CODE");
+                                }
                             }
                         }
                     });

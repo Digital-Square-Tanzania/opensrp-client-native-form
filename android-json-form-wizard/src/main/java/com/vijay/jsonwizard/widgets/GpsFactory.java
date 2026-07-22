@@ -27,6 +27,8 @@ import com.vijay.jsonwizard.interfaces.CommonListener;
 import com.vijay.jsonwizard.interfaces.FormWidgetFactory;
 import com.vijay.jsonwizard.interfaces.JsonApi;
 import com.vijay.jsonwizard.interfaces.OnActivityRequestPermissionResultListener;
+import com.vijay.jsonwizard.location.GpsLocationProvider;
+import com.vijay.jsonwizard.location.GpsLocationProviderFactory;
 import com.vijay.jsonwizard.utils.PermissionUtils;
 import com.vijay.jsonwizard.utils.ValidationStatus;
 import com.vijay.jsonwizard.views.JsonFormFragmentView;
@@ -53,6 +55,16 @@ import timber.log.Timber;
 public class GpsFactory implements FormWidgetFactory {
 
     protected GpsDialog gpsDialog;
+    private final GpsLocationProviderFactory locationProviderFactory;
+    private GpsLocationProvider warmUpLocationProvider;
+
+    public GpsFactory() {
+        this(new GpsLocationProviderFactory());
+    }
+
+    GpsFactory(GpsLocationProviderFactory locationProviderFactory) {
+        this.locationProviderFactory = locationProviderFactory;
+    }
 
     public static ValidationStatus validate(JsonFormFragmentView formFragmentView,
                                             Button recordButton) {
@@ -253,6 +265,8 @@ public class GpsFactory implements FormWidgetFactory {
                 return false;
             }
         });
+
+        prepareLocationWarmUp(context, rootLayout, recordButton);
     }
 
     @NotNull
@@ -323,8 +337,11 @@ public class GpsFactory implements FormWidgetFactory {
     public void requestPermissionsForLocation(Context context) {
         if (context instanceof Activity) {
             Activity activity = (Activity) context;
+            Timber.i("GpsFactory: requestPermissionsForLocation activity=%s", activity.getClass().getSimpleName());
+            stopLocationWarmUp();
 
             if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Timber.w("GpsFactory: ACCESS_FINE_LOCATION not granted, requesting permission");
                 // Register the RequestPermissionResult listener
                 if (activity instanceof JsonApi) {
                     final JsonApi jsonApi = (JsonApi) activity;
@@ -332,8 +349,10 @@ public class GpsFactory implements FormWidgetFactory {
                         @Override
                         public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) {
                             if (PermissionUtils.verifyPermissionGranted(permissions, grantResults, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                                Timber.i("GpsFactory: ACCESS_FINE_LOCATION granted from permission callback");
                                 showGpsDialog();
                             } else {
+                                Timber.w("GpsFactory: ACCESS_FINE_LOCATION denied from permission callback");
                                 jsonApi.removeOnActivityRequestPermissionResultListener(PermissionUtils.FINE_LOCATION_PERMISSION_REQUEST_CODE);
                             }
                         }
@@ -342,13 +361,104 @@ public class GpsFactory implements FormWidgetFactory {
 
                 ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PermissionUtils.FINE_LOCATION_PERMISSION_REQUEST_CODE);
             } else {
+                Timber.i("GpsFactory: ACCESS_FINE_LOCATION already granted, showing GPS dialog");
                 showGpsDialog();
             }
         }
     }
 
     protected void showGpsDialog() {
+        Timber.i("GpsFactory: showing GPS dialog");
+        stopLocationWarmUp();
         gpsDialog.show();
+    }
+
+    protected void prepareLocationWarmUp(final Context context, View rootLayout, final Button recordButton) {
+        rootLayout.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View view) {
+                startLocationWarmUp(context, recordButton);
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                stopLocationWarmUp();
+            }
+        });
+
+        if (rootLayout.isAttachedToWindow()) {
+            startLocationWarmUp(context, recordButton);
+        }
+    }
+
+    protected void startLocationWarmUp(Context context, Button recordButton) {
+        if (warmUpLocationProvider != null) {
+            Timber.i("GpsFactory: GPS warm-up already running");
+            return;
+        }
+
+        if (recordButton != null && !recordButton.isEnabled()) {
+            Timber.i("GpsFactory: GPS warm-up skipped because widget is disabled");
+            return;
+        }
+
+        if (!hasFineLocationPermission(context)) {
+            Timber.i("GpsFactory: GPS warm-up skipped because ACCESS_FINE_LOCATION is not granted");
+            return;
+        }
+
+        Timber.i("GpsFactory: starting GPS warm-up");
+        warmUpLocationProvider = locationProviderFactory.create(context, getWarmUpLocationCallback(context), true);
+        warmUpLocationProvider.start();
+    }
+
+    protected boolean hasFineLocationPermission(Context context) {
+        return context instanceof Activity
+                && ContextCompat.checkSelfPermission((Activity) context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    protected void stopLocationWarmUp() {
+        if (warmUpLocationProvider != null) {
+            Timber.i("GpsFactory: stopping GPS warm-up provider=%s", warmUpLocationProvider.getClass().getSimpleName());
+            warmUpLocationProvider.stop();
+            warmUpLocationProvider = null;
+        }
+    }
+
+    private GpsLocationProvider.Callback getWarmUpLocationCallback(final Context context) {
+        return new GpsLocationProvider.Callback() {
+            @Override
+            public void onLocationUpdate(Location location) {
+                Timber.i("GpsFactory: GPS warm-up received location=%s", describeLocation(location));
+            }
+
+            @Override
+            public void onLocationError(int errorResId, boolean canFallbackToPlatform) {
+                Timber.w("GpsFactory: GPS warm-up provider error errorResId=%s canFallbackToPlatform=%s", errorResId, canFallbackToPlatform);
+                if (canFallbackToPlatform && warmUpLocationProvider != null && warmUpLocationProvider.isUsingGooglePlayServices()) {
+                    stopLocationWarmUp();
+                    Timber.i("GpsFactory: restarting GPS warm-up with platform provider");
+                    warmUpLocationProvider = locationProviderFactory.create(context, getWarmUpLocationCallback(context), false);
+                    warmUpLocationProvider.start();
+                    return;
+                }
+
+                stopLocationWarmUp();
+            }
+        };
+    }
+
+    private String describeLocation(Location location) {
+        if (location == null) {
+            return "null";
+        }
+
+        return "provider=" + location.getProvider()
+                + ", lat=" + location.getLatitude()
+                + ", lon=" + location.getLongitude()
+                + ", accuracy=" + location.getAccuracy()
+                + ", time=" + location.getTime()
+                + ", elapsedRealtimeNanos=" + location.getElapsedRealtimeNanos();
     }
 
     @Override
